@@ -4,9 +4,9 @@ import logo from '@/assets/logo-white.png';
 
 export function Header() {
   return (
-    <header className="h-16 bg-primary px-6 flex items-center justify-between shadow-md">
+    <header className="h-20 bg-primary px-6 flex items-center justify-between shadow-lg rounded-b-2xl">
       <div className="flex items-center">
-        <img src={logo} alt="Smart Parking Line" className="h-10" />
+        <img src={logo} alt="Smart Parking Line" className="h-14" />
       </div>
 
       <div className="flex items-center gap-2">
