@@ -6,9 +6,9 @@ export function DriverLayout() {
   return (
     <div className="min-h-screen bg-background flex flex-col" dir="rtl">
       {/* Header */}
-      <header className="bg-card border-b border-border p-4 z-10">
+      <header className="bg-card border-b border-border p-4 z-10 shadow-md rounded-b-xl">
         <div className="flex items-center justify-center">
-          <img src={logo} alt="المواقف الذكية" className="h-8" />
+          <img src={logo} alt="المواقف الذكية" className="h-12" />
         </div>
       </header>
 
