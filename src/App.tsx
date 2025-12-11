@@ -8,6 +8,7 @@ import Violations from "./pages/Violations";
 import MapView from "./pages/MapView";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import DriverMap from "./pages/DriverMap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/map" element={<MapView />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/driver" element={<DriverMap />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
