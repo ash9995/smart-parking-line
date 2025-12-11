@@ -47,7 +47,7 @@ export default function Dashboard() {
             <h2 className="text-xl sm:text-2xl font-bold">لوحة التحكم</h2>
             <p className="text-xs sm:text-sm text-muted-foreground">مراقبة المواقف والمخالفات في الوقت الفعلي</p>
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground bg-card px-3 py-2 rounded-xl shadow-md">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground bg-card px-3 py-2 rounded-xl shadow-sm">
             <RefreshCw className="h-3 w-3 animate-pulse-subtle" />
             <span>آخر تحديث: {formatTime(lastUpdate)}</span>
           </div>
