@@ -1,10 +1,10 @@
 import { Violation, ParkingSpot, DashboardStats } from '@/types/parking';
 
 export const mockStats: DashboardStats = {
-  totalSpots: 450,
-  occupiedSpots: 312,
-  violationsToday: 28,
-  revenueToday: 4200,
+  totalSpots: 520,
+  occupiedSpots: 385,
+  violationsToday: 42,
+  revenueToday: 6300,
 };
 
 export const mockViolations: Violation[] = [
@@ -58,37 +58,100 @@ export const mockViolations: Violation[] = [
     fineAmount: 200,
     location: { lat: 24.7130, lng: 46.6740 },
   },
+  {
+    id: '6',
+    spotId: 'E02',
+    plateNumber: 'ش ص ض ١١١١',
+    violationType: 'tilted',
+    timestamp: new Date(Date.now() - 1000 * 60 * 75),
+    status: 'paid',
+    fineAmount: 150,
+    location: { lat: 24.7155, lng: 46.6775 },
+  },
+  {
+    id: '7',
+    spotId: 'F08',
+    plateNumber: 'ط ظ ع ٢٢٢٢',
+    violationType: 'wrong_direction',
+    timestamp: new Date(Date.now() - 1000 * 60 * 90),
+    status: 'sent',
+    fineAmount: 150,
+    location: { lat: 24.7160, lng: 46.6780 },
+  },
 ];
 
 // Riyadh neighborhoods and streets
 export const riyadhLocations = [
   { neighborhood: 'العليا', street: 'طريق الملك فهد' },
+  { neighborhood: 'العليا', street: 'شارع العروبة' },
+  { neighborhood: 'العليا', street: 'شارع الأمير محمد بن عبدالعزيز' },
   { neighborhood: 'النخيل', street: 'شارع التخصصي' },
+  { neighborhood: 'النخيل', street: 'طريق أنس بن مالك' },
+  { neighborhood: 'النخيل', street: 'شارع الوادي' },
   { neighborhood: 'الربوة', street: 'شارع الأمير سلطان' },
+  { neighborhood: 'الربوة', street: 'شارع الحسن بن الحسين' },
   { neighborhood: 'السليمانية', street: 'شارع العروبة' },
+  { neighborhood: 'السليمانية', street: 'شارع الأمير عبدالله' },
   { neighborhood: 'الملز', street: 'شارع صلاح الدين' },
+  { neighborhood: 'الملز', street: 'شارع جرير' },
   { neighborhood: 'المروج', street: 'طريق أنس بن مالك' },
+  { neighborhood: 'المروج', street: 'شارع الإمام الشافعي' },
   { neighborhood: 'الورود', street: 'شارع الضباب' },
+  { neighborhood: 'الورود', street: 'شارع موسى بن نصير' },
   { neighborhood: 'الصحافة', street: 'طريق الثمامة' },
+  { neighborhood: 'الصحافة', street: 'شارع العليا' },
   { neighborhood: 'الياسمين', street: 'شارع سعود بن عبدالعزيز' },
+  { neighborhood: 'الياسمين', street: 'طريق الملك سلمان' },
   { neighborhood: 'حطين', street: 'شارع التحلية' },
+  { neighborhood: 'حطين', street: 'طريق الأمير محمد بن سعد' },
+  { neighborhood: 'الغدير', street: 'شارع الإمام أحمد' },
+  { neighborhood: 'الغدير', street: 'شارع أبو بكر الصديق' },
+  { neighborhood: 'النرجس', street: 'طريق الملك سلمان' },
+  { neighborhood: 'النرجس', street: 'شارع الأمير تركي' },
+  { neighborhood: 'الملقا', street: 'طريق أنس بن مالك' },
+  { neighborhood: 'الملقا', street: 'شارع عثمان بن عفان' },
+  { neighborhood: 'العقيق', street: 'طريق الملك خالد' },
+  { neighborhood: 'العقيق', street: 'شارع الشيخ محمد بن عثيمين' },
+  { neighborhood: 'الرائد', street: 'شارع المعذر' },
+  { neighborhood: 'الرائد', street: 'طريق الملك عبدالعزيز' },
+  { neighborhood: 'الصفا', street: 'شارع الستين' },
+  { neighborhood: 'الصفا', street: 'شارع الأمير مشعل' },
+  { neighborhood: 'المحمدية', street: 'طريق خريص' },
+  { neighborhood: 'المحمدية', street: 'شارع الشيخ حسن' },
+  { neighborhood: 'الروضة', street: 'شارع الأمير سعود الفيصل' },
+  { neighborhood: 'الروضة', street: 'شارع عبدالرحمن الغافقي' },
+  { neighborhood: 'النسيم', street: 'طريق الدمام' },
+  { neighborhood: 'النسيم', street: 'شارع سعد بن أبي وقاص' },
 ];
 
-export const mockParkingSpots: ParkingSpot[] = [
-  { id: 'A01', status: 'available', location: { lat: 24.7136, lng: 46.6753 }, zone: 'A', neighborhood: 'العليا', street: 'طريق الملك فهد' },
-  { id: 'A02', status: 'occupied', location: { lat: 24.7137, lng: 46.6754 }, zone: 'A', neighborhood: 'العليا', street: 'طريق الملك فهد' },
-  { id: 'A03', status: 'violation', location: { lat: 24.7138, lng: 46.6755 }, zone: 'A', neighborhood: 'العليا', street: 'شارع العروبة' },
-  { id: 'A04', status: 'available', location: { lat: 24.7139, lng: 46.6756 }, zone: 'A', neighborhood: 'العليا', street: 'شارع العروبة' },
-  { id: 'B01', status: 'occupied', location: { lat: 24.7140, lng: 46.6757 }, zone: 'B', neighborhood: 'النخيل', street: 'شارع التخصصي' },
-  { id: 'B02', status: 'available', location: { lat: 24.7141, lng: 46.6758 }, zone: 'B', neighborhood: 'النخيل', street: 'شارع التخصصي' },
-  { id: 'B03', status: 'available', location: { lat: 24.7142, lng: 46.6759 }, zone: 'B', neighborhood: 'النخيل', street: 'طريق أنس بن مالك' },
-  { id: 'B04', status: 'occupied', location: { lat: 24.7143, lng: 46.6760 }, zone: 'B', neighborhood: 'النخيل', street: 'طريق أنس بن مالك' },
-  { id: 'C01', status: 'available', location: { lat: 24.7144, lng: 46.6761 }, zone: 'C', neighborhood: 'الربوة', street: 'شارع الأمير سلطان' },
-  { id: 'C02', status: 'violation', location: { lat: 24.7145, lng: 46.6762 }, zone: 'C', neighborhood: 'الربوة', street: 'شارع الأمير سلطان' },
-  { id: 'C03', status: 'occupied', location: { lat: 24.7146, lng: 46.6763 }, zone: 'C', neighborhood: 'السليمانية', street: 'شارع العروبة' },
-  { id: 'C04', status: 'available', location: { lat: 24.7147, lng: 46.6764 }, zone: 'C', neighborhood: 'السليمانية', street: 'شارع صلاح الدين' },
-  { id: 'D01', status: 'occupied', location: { lat: 24.7148, lng: 46.6765 }, zone: 'D', neighborhood: 'الملز', street: 'شارع صلاح الدين' },
-  { id: 'D02', status: 'available', location: { lat: 24.7149, lng: 46.6766 }, zone: 'D', neighborhood: 'الملز', street: 'شارع الضباب' },
-  { id: 'D03', status: 'occupied', location: { lat: 24.7150, lng: 46.6767 }, zone: 'D', neighborhood: 'المروج', street: 'طريق أنس بن مالك' },
-  { id: 'D04', status: 'available', location: { lat: 24.7151, lng: 46.6768 }, zone: 'D', neighborhood: 'المروج', street: 'شارع التحلية' },
-];
+const zones = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
+export const mockParkingSpots: ParkingSpot[] = [];
+
+// Generate 55 parking spots
+for (let i = 0; i < 55; i++) {
+  const zone = zones[Math.floor(i / 7) % zones.length];
+  const spotNum = (i % 7) + 1;
+  const location = riyadhLocations[i % riyadhLocations.length];
+  const statusRandom = Math.random();
+  let status: 'available' | 'occupied' | 'violation';
+  if (statusRandom < 0.35) {
+    status = 'available';
+  } else if (statusRandom < 0.9) {
+    status = 'occupied';
+  } else {
+    status = 'violation';
+  }
+  
+  mockParkingSpots.push({
+    id: `${zone}${String(spotNum).padStart(2, '0')}`,
+    status,
+    location: { 
+      lat: 24.7100 + (i * 0.001), 
+      lng: 46.6700 + (i * 0.0008) 
+    },
+    zone,
+    neighborhood: location.neighborhood,
+    street: location.street,
+  });
+}
