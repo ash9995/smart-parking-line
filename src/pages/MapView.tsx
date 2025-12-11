@@ -1,13 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { mockParkingSpots } from '@/data/mockData';
 import { ParkingSpot } from '@/types/parking';
 import { cn } from '@/lib/utils';
-import { MapPin, Navigation } from 'lucide-react';
+import { Navigation, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 export default function MapView() {
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
+  const [mapboxToken, setMapboxToken] = useState('');
+  const [isMapReady, setIsMapReady] = useState(false);
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   const availableCount = mockParkingSpots.filter((s) => s.status === 'available').length;
   const occupiedCount = mockParkingSpots.filter((s) => s.status === 'occupied').length;
@@ -16,11 +24,11 @@ export default function MapView() {
   const getSpotColor = (status: ParkingSpot['status']) => {
     switch (status) {
       case 'available':
-        return 'bg-primary text-primary-foreground';
+        return '#0F824B';
       case 'occupied':
-        return 'bg-muted-foreground text-background';
+        return '#6B7280';
       case 'violation':
-        return 'bg-destructive text-destructive-foreground';
+        return '#DC2626';
     }
   };
 
@@ -28,6 +36,70 @@ export default function MapView() {
     available: 'متاح',
     occupied: 'مشغول',
     violation: 'مخالفة',
+  };
+
+  const initializeMap = () => {
+    if (!mapContainer.current || !mapboxToken) return;
+
+    mapboxgl.accessToken = mapboxToken;
+
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: [46.6753, 24.7136], // Riyadh center
+      zoom: 14,
+    });
+
+    map.current.addControl(new mapboxgl.NavigationControl(), 'top-left');
+
+    map.current.on('load', () => {
+      setIsMapReady(true);
+
+      // Add markers for each parking spot
+      mockParkingSpots.forEach((spot) => {
+        const el = document.createElement('div');
+        el.className = 'parking-marker';
+        el.style.width = '24px';
+        el.style.height = '24px';
+        el.style.borderRadius = '50%';
+        el.style.backgroundColor = getSpotColor(spot.status);
+        el.style.border = '3px solid white';
+        el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+        el.style.cursor = 'pointer';
+        el.style.display = 'flex';
+        el.style.alignItems = 'center';
+        el.style.justifyContent = 'center';
+        el.style.fontSize = '10px';
+        el.style.fontWeight = 'bold';
+        el.style.color = 'white';
+
+        el.addEventListener('click', () => {
+          setSelectedSpot(spot);
+        });
+
+        const marker = new mapboxgl.Marker(el)
+          .setLngLat([spot.location.lng, spot.location.lat])
+          .addTo(map.current!);
+
+        markersRef.current.push(marker);
+      });
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      markersRef.current.forEach((marker) => marker.remove());
+      map.current?.remove();
+    };
+  }, []);
+
+  const handleNavigate = () => {
+    if (selectedSpot) {
+      window.open(
+        `https://www.google.com/maps/dir/?api=1&destination=${selectedSpot.location.lat},${selectedSpot.location.lng}`,
+        '_blank'
+      );
+    }
   };
 
   return (
@@ -43,38 +115,48 @@ export default function MapView() {
         {/* Summary */}
         <div className="flex gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-primary" />
+            <div className="w-4 h-4 rounded-full bg-primary" />
             <span className="text-sm">متاح ({availableCount})</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-muted-foreground" />
+            <div className="w-4 h-4 rounded-full bg-muted-foreground" />
             <span className="text-sm">مشغول ({occupiedCount})</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-destructive" />
+            <div className="w-4 h-4 rounded-full bg-destructive" />
             <span className="text-sm">مخالفة ({violationCount})</span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Large Map Area */}
-          <div className="lg:col-span-2 bg-muted/30 border border-border min-h-[500px] p-8">
-            <div className="grid grid-cols-5 gap-3">
-              {mockParkingSpots.map((spot) => (
-                <button
-                  key={spot.id}
-                  onClick={() => setSelectedSpot(spot)}
-                  className={cn(
-                    'aspect-[3/2] flex flex-col items-center justify-center text-sm font-medium transition-all',
-                    getSpotColor(spot.status),
-                    selectedSpot?.id === spot.id && 'ring-2 ring-offset-2 ring-primary'
-                  )}
-                >
-                  <MapPin className="h-4 w-4 mb-1" />
-                  {spot.id}
-                </button>
-              ))}
-            </div>
+          {/* Map Area */}
+          <div className="lg:col-span-2 bg-card border border-border min-h-[500px] relative overflow-hidden">
+            {!mapboxToken ? (
+              <div className="absolute inset-0 flex items-center justify-center p-8">
+                <div className="max-w-md w-full space-y-4 text-center">
+                  <Key className="h-12 w-12 mx-auto text-muted-foreground" />
+                  <h3 className="font-medium text-lg">أدخل مفتاح Mapbox</h3>
+                  <p className="text-sm text-muted-foreground">
+                    للوصول إلى الخريطة، يرجى إدخال مفتاح Mapbox العام الخاص بك
+                  </p>
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      placeholder="pk.eyJ1..."
+                      value={mapboxToken}
+                      onChange={(e) => setMapboxToken(e.target.value)}
+                      className="text-left"
+                      dir="ltr"
+                    />
+                    <Button onClick={initializeMap} disabled={!mapboxToken}>
+                      تفعيل
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div ref={mapContainer} className="absolute inset-0" />
+            )}
           </div>
 
           {/* Spot Details Sidebar */}
@@ -95,8 +177,10 @@ export default function MapView() {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">الحالة</span>
                     <span className={cn(
-                      'px-2 py-0.5 text-xs font-medium',
-                      getSpotColor(selectedSpot.status)
+                      'px-2 py-0.5 text-xs font-medium rounded',
+                      selectedSpot.status === 'available' && 'bg-primary text-primary-foreground',
+                      selectedSpot.status === 'occupied' && 'bg-muted-foreground text-background',
+                      selectedSpot.status === 'violation' && 'bg-destructive text-destructive-foreground'
                     )}>
                       {statusLabels[selectedSpot.status]}
                     </span>
@@ -109,7 +193,7 @@ export default function MapView() {
                   </div>
                 </div>
 
-                <Button className="w-full" variant="outline">
+                <Button className="w-full" variant="outline" onClick={handleNavigate}>
                   <Navigation className="h-4 w-4 ml-2" />
                   فتح في الخرائط
                 </Button>
