@@ -1,36 +1,19 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { mockParkingSpots } from '@/data/mockData';
 import { ParkingSpot } from '@/types/parking';
 import { cn } from '@/lib/utils';
-import { Navigation, Key } from 'lucide-react';
+import { Navigation, Send, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { toast } from '@/hooks/use-toast';
 
 export default function MapView() {
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
-  const [mapboxToken, setMapboxToken] = useState('');
-  const [isMapReady, setIsMapReady] = useState(false);
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const [sentViolations, setSentViolations] = useState<Set<string>>(new Set());
 
   const availableCount = mockParkingSpots.filter((s) => s.status === 'available').length;
   const occupiedCount = mockParkingSpots.filter((s) => s.status === 'occupied').length;
   const violationCount = mockParkingSpots.filter((s) => s.status === 'violation').length;
-
-  const getSpotColor = (status: ParkingSpot['status']) => {
-    switch (status) {
-      case 'available':
-        return '#0F824B';
-      case 'occupied':
-        return '#6B7280';
-      case 'violation':
-        return '#DC2626';
-    }
-  };
 
   const statusLabels = {
     available: 'متاح',
@@ -38,60 +21,23 @@ export default function MapView() {
     violation: 'مخالفة',
   };
 
-  const initializeMap = () => {
-    if (!mapContainer.current || !mapboxToken) return;
-
-    mapboxgl.accessToken = mapboxToken;
-
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [46.6753, 24.7136], // Riyadh center
-      zoom: 14,
-    });
-
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-left');
-
-    map.current.on('load', () => {
-      setIsMapReady(true);
-
-      // Add markers for each parking spot
-      mockParkingSpots.forEach((spot) => {
-        const el = document.createElement('div');
-        el.className = 'parking-marker';
-        el.style.width = '24px';
-        el.style.height = '24px';
-        el.style.borderRadius = '50%';
-        el.style.backgroundColor = getSpotColor(spot.status);
-        el.style.border = '3px solid white';
-        el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
-        el.style.cursor = 'pointer';
-        el.style.display = 'flex';
-        el.style.alignItems = 'center';
-        el.style.justifyContent = 'center';
-        el.style.fontSize = '10px';
-        el.style.fontWeight = 'bold';
-        el.style.color = 'white';
-
-        el.addEventListener('click', () => {
-          setSelectedSpot(spot);
-        });
-
-        const marker = new mapboxgl.Marker(el)
-          .setLngLat([spot.location.lng, spot.location.lat])
-          .addTo(map.current!);
-
-        markersRef.current.push(marker);
-      });
-    });
-  };
-
+  // Auto-send tickets for violations
   useEffect(() => {
-    return () => {
-      markersRef.current.forEach((marker) => marker.remove());
-      map.current?.remove();
-    };
-  }, []);
+    const violationSpots = mockParkingSpots.filter(s => s.status === 'violation');
+    
+    violationSpots.forEach((spot) => {
+      if (!sentViolations.has(spot.id)) {
+        // Simulate auto-sending to Absher
+        setTimeout(() => {
+          setSentViolations(prev => new Set(prev).add(spot.id));
+          toast({
+            title: 'تم إرسال المخالفة',
+            description: `تم إرسال مخالفة الموقف ${spot.id} إلى أبشر تلقائياً`,
+          });
+        }, 1000 + Math.random() * 2000);
+      }
+    });
+  }, [sentViolations]);
 
   const handleNavigate = () => {
     if (selectedSpot) {
@@ -129,38 +75,71 @@ export default function MapView() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Map Area */}
-          <div className="lg:col-span-2 bg-card border border-border min-h-[500px] relative overflow-hidden">
-            {!mapboxToken ? (
-              <div className="absolute inset-0 flex items-center justify-center p-8">
-                <div className="max-w-md w-full space-y-4 text-center">
-                  <Key className="h-12 w-12 mx-auto text-muted-foreground" />
-                  <h3 className="font-medium text-lg">أدخل مفتاح Mapbox</h3>
-                  <p className="text-sm text-muted-foreground">
-                    للوصول إلى الخريطة، يرجى إدخال مفتاح Mapbox العام الخاص بك
-                  </p>
-                  <div className="flex gap-2">
-                    <Input
-                      type="text"
-                      placeholder="pk.eyJ1..."
-                      value={mapboxToken}
-                      onChange={(e) => setMapboxToken(e.target.value)}
-                      className="text-left"
-                      dir="ltr"
-                    />
-                    <Button onClick={initializeMap} disabled={!mapboxToken}>
-                      تفعيل
-                    </Button>
-                  </div>
+          {/* Mock Map Area */}
+          <div className="lg:col-span-2 bg-card rounded-xl shadow-lg min-h-[500px] relative overflow-hidden">
+            {/* Simple Mock Map Grid */}
+            <div className="absolute inset-0 p-4">
+              <div className="w-full h-full bg-muted/30 rounded-lg relative">
+                {/* Grid lines */}
+                <div className="absolute inset-0 grid grid-cols-6 grid-rows-6">
+                  {Array.from({ length: 36 }).map((_, i) => (
+                    <div key={i} className="border border-border/30" />
+                  ))}
+                </div>
+                
+                {/* Road lines */}
+                <div className="absolute inset-y-0 left-1/2 w-8 -translate-x-1/2 bg-muted-foreground/20" />
+                <div className="absolute inset-x-0 top-1/2 h-8 -translate-y-1/2 bg-muted-foreground/20" />
+                
+                {/* Parking spot markers */}
+                {mockParkingSpots.map((spot, index) => {
+                  const row = Math.floor(index / 4);
+                  const col = index % 4;
+                  const top = 10 + row * 20;
+                  const left = 10 + col * 22;
+                  
+                  return (
+                    <button
+                      key={spot.id}
+                      onClick={() => setSelectedSpot(spot)}
+                      className={cn(
+                        'absolute w-10 h-10 rounded-full border-4 border-card shadow-lg transition-all hover:scale-110 flex items-center justify-center',
+                        selectedSpot?.id === spot.id && 'ring-4 ring-primary/50 scale-110',
+                        spot.status === 'available' && 'bg-primary',
+                        spot.status === 'occupied' && 'bg-muted-foreground',
+                        spot.status === 'violation' && 'bg-destructive'
+                      )}
+                      style={{ top: `${top}%`, left: `${left}%` }}
+                    >
+                      {spot.status === 'violation' && sentViolations.has(spot.id) && (
+                        <CheckCircle className="h-4 w-4 text-destructive-foreground" />
+                      )}
+                      {spot.status === 'violation' && !sentViolations.has(spot.id) && (
+                        <Send className="h-3 w-3 text-destructive-foreground animate-pulse" />
+                      )}
+                    </button>
+                  );
+                })}
+                
+                {/* Zone labels */}
+                <div className="absolute top-4 right-4 text-xs font-medium text-muted-foreground bg-card/80 px-2 py-1 rounded">
+                  المنطقة A
+                </div>
+                <div className="absolute top-4 left-4 text-xs font-medium text-muted-foreground bg-card/80 px-2 py-1 rounded">
+                  المنطقة B
+                </div>
+                <div className="absolute bottom-4 right-4 text-xs font-medium text-muted-foreground bg-card/80 px-2 py-1 rounded">
+                  المنطقة C
+                </div>
+                <div className="absolute bottom-4 left-4 text-xs font-medium text-muted-foreground bg-card/80 px-2 py-1 rounded">
+                  المنطقة D
                 </div>
               </div>
-            ) : (
-              <div ref={mapContainer} className="absolute inset-0" />
-            )}
+            </div>
           </div>
 
           {/* Spot Details Sidebar */}
-          <div className="bg-card border border-border p-6">
+          <div className="bg-card rounded-xl shadow-lg p-6">
             {selectedSpot ? (
               <div className="space-y-4">
                 <h3 className="font-medium text-lg">تفاصيل الموقف</h3>
@@ -179,12 +158,35 @@ export default function MapView() {
                     <span className={cn(
                       'px-2 py-0.5 text-xs font-medium rounded',
                       selectedSpot.status === 'available' && 'bg-primary text-primary-foreground',
-                      selectedSpot.status === 'occupied' && 'bg-muted-foreground text-background',
+                      selectedSpot.status === 'occupied' && 'bg-muted-foreground text-card',
                       selectedSpot.status === 'violation' && 'bg-destructive text-destructive-foreground'
                     )}>
                       {statusLabels[selectedSpot.status]}
                     </span>
                   </div>
+                  {selectedSpot.status === 'violation' && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">حالة الإرسال</span>
+                      <span className={cn(
+                        'px-2 py-0.5 text-xs font-medium rounded flex items-center gap-1',
+                        sentViolations.has(selectedSpot.id) 
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-warning text-warning-foreground'
+                      )}>
+                        {sentViolations.has(selectedSpot.id) ? (
+                          <>
+                            <CheckCircle className="h-3 w-3" />
+                            تم الإرسال
+                          </>
+                        ) : (
+                          <>
+                            <Send className="h-3 w-3 animate-pulse" />
+                            جاري الإرسال...
+                          </>
+                        )}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">الإحداثيات</span>
                     <span className="text-xs font-mono">
@@ -193,7 +195,7 @@ export default function MapView() {
                   </div>
                 </div>
 
-                <Button className="w-full" variant="outline" onClick={handleNavigate}>
+                <Button className="w-full rounded-lg" variant="outline" onClick={handleNavigate}>
                   <Navigation className="h-4 w-4 ml-2" />
                   فتح في الخرائط
                 </Button>
