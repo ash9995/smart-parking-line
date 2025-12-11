@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { Violation, violationTypeLabels, statusLabels } from '@/types/parking';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Send, Eye } from 'lucide-react';
+import { Eye, CheckCircle } from 'lucide-react';
 import { ViolationModal } from './ViolationModal';
-import { toast } from 'sonner';
 
 interface ViolationTableProps {
   violations: Violation[];
@@ -22,18 +21,10 @@ export function ViolationTable({ violations, onSendToAbsher }: ViolationTablePro
     }).format(date);
   };
 
-  const handleSendToAbsher = (violation: Violation) => {
-    if (violation.status !== 'new') {
-      toast.error('تم إرسال هذه المخالفة مسبقاً');
-      return;
-    }
-    onSendToAbsher(violation.id);
-    toast.success('تم الإرسال بنجاح إلى أبشر');
-  };
-
   return (
     <>
-      <div className="bg-card border border-border overflow-hidden">
+      {/* Desktop Table */}
+      <div className="hidden sm:block bg-card border border-border overflow-hidden rounded-2xl shadow-lg">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -52,7 +43,7 @@ export function ViolationTable({ violations, onSendToAbsher }: ViolationTablePro
                   key={violation.id}
                   className={cn(
                     'border-b border-border last:border-0 transition-colors hover:bg-muted/30',
-                    violation.status === 'new' && 'border-r-2 border-r-primary'
+                    violation.status === 'new' && 'border-r-4 border-r-primary'
                   )}
                 >
                   <td className="py-4 px-4 text-sm">{formatTime(violation.timestamp)}</td>
@@ -62,42 +53,84 @@ export function ViolationTable({ violations, onSendToAbsher }: ViolationTablePro
                   <td className="py-4 px-4">
                     <span
                       className={cn(
-                        'inline-flex px-2 py-1 text-xs font-medium rounded-sm',
+                        'inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full shadow-sm',
                         violation.status === 'new' && 'bg-accent text-accent-foreground',
-                        violation.status === 'sent' && 'bg-warning/10 text-warning-foreground',
+                        violation.status === 'sent' && 'bg-primary/10 text-primary',
                         violation.status === 'paid' && 'bg-muted text-muted-foreground'
                       )}
                     >
+                      {violation.status === 'sent' && <CheckCircle className="h-3 w-3" />}
                       {statusLabels[violation.status]}
                     </span>
                   </td>
                   <td className="py-4 px-4">
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedViolation(violation)}
-                        className="h-8 px-2"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant={violation.status === 'new' ? 'default' : 'ghost'}
-                        size="sm"
-                        onClick={() => handleSendToAbsher(violation)}
-                        disabled={violation.status !== 'new'}
-                        className="h-8 text-xs"
-                      >
-                        <Send className="h-3 w-3 ml-1" />
-                        إرسال لأبشر
-                      </Button>
-                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedViolation(violation)}
+                      className="h-8 px-3 rounded-xl"
+                    >
+                      <Eye className="h-4 w-4 ml-1" />
+                      عرض
+                    </Button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="sm:hidden space-y-3">
+        {violations.map((violation) => (
+          <div
+            key={violation.id}
+            className={cn(
+              'bg-card border border-border p-4 rounded-2xl shadow-lg',
+              violation.status === 'new' && 'border-r-4 border-r-primary'
+            )}
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <p className="font-medium text-sm">{violation.spotId}</p>
+                <p className="text-xs text-muted-foreground">{formatTime(violation.timestamp)}</p>
+              </div>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full shadow-sm',
+                  violation.status === 'new' && 'bg-accent text-accent-foreground',
+                  violation.status === 'sent' && 'bg-primary/10 text-primary',
+                  violation.status === 'paid' && 'bg-muted text-muted-foreground'
+                )}
+              >
+                {violation.status === 'sent' && <CheckCircle className="h-3 w-3" />}
+                {statusLabels[violation.status]}
+              </span>
+            </div>
+            
+            <div className="space-y-2 mb-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">نوع المخالفة</span>
+                <span>{violationTypeLabels[violation.violationType]}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">رقم اللوحة</span>
+                <span className="font-medium">{violation.plateNumber}</span>
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedViolation(violation)}
+              className="w-full rounded-xl shadow-sm"
+            >
+              <Eye className="h-4 w-4 ml-1" />
+              عرض التفاصيل
+            </Button>
+          </div>
+        ))}
       </div>
 
       <ViolationModal
