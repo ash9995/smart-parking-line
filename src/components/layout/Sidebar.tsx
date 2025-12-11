@@ -12,22 +12,22 @@ const navItems = [
 
 export function Sidebar() {
   return (
-    <aside className="w-56 border-l border-border bg-sidebar min-h-[calc(100vh-4rem)] p-4">
-      <nav className="space-y-1">
+    <aside className="hidden lg:block w-56 border-l border-border bg-sidebar min-h-[calc(100vh-6rem)] p-4">
+      <nav className="space-y-2">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors',
+                'flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all duration-200 rounded-xl',
                 isActive
-                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                  : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-md'
+                  : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:shadow-sm'
               )
             }
           >
-            <item.icon className="h-4 w-4" />
+            <item.icon className="h-5 w-5" />
             {item.label}
           </NavLink>
         ))}

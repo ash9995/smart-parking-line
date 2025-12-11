@@ -21,6 +21,8 @@ export interface ParkingSpot {
     lng: number;
   };
   zone: string;
+  neighborhood?: string;
+  street?: string;
 }
 
 export interface DashboardStats {

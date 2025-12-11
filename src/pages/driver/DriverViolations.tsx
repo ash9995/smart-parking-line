@@ -1,6 +1,6 @@
 import { mockViolations } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, Calendar, Car } from 'lucide-react';
+import { ExternalLink, MapPin, Calendar, Car, CheckCircle } from 'lucide-react';
 
 const violationTypeLabels: Record<string, string> = {
   tilted: 'وقوف مائل',
@@ -15,7 +15,6 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function DriverViolations() {
-  // Filter to show only user's violations (in real app, filter by user's plate)
   const userViolations = mockViolations;
 
   const totalUnpaid = userViolations
@@ -30,15 +29,14 @@ export default function DriverViolations() {
     }).format(date);
   };
 
-  const handlePayViolation = (violationId: string) => {
-    // Deep link to Absher app
+  const handlePayViolation = () => {
     window.open('https://www.absher.sa/', '_blank');
   };
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 pb-24 space-y-4">
       {/* Summary Card */}
-      <div className="bg-primary text-primary-foreground p-4 space-y-2">
+      <div className="bg-primary text-primary-foreground p-5 space-y-2 rounded-2xl shadow-xl">
         <p className="text-sm opacity-90">إجمالي المستحقات</p>
         <p className="text-3xl font-bold">{totalUnpaid.toLocaleString('ar-SA')} ريال</p>
         <p className="text-sm opacity-90">{userViolations.filter((v) => v.status !== 'paid').length} مخالفات غير مسددة</p>
@@ -46,10 +44,10 @@ export default function DriverViolations() {
 
       {/* Violations List */}
       <div className="space-y-3">
-        <h2 className="text-lg font-semibold">المخالفات</h2>
+        <h2 className="text-lg font-semibold">سجل المخالفات</h2>
 
         {userViolations.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
+          <div className="text-center py-12 text-muted-foreground bg-card rounded-2xl shadow-lg">
             <Car className="h-12 w-12 mx-auto mb-3 opacity-50" />
             <p>لا توجد مخالفات مسجلة</p>
           </div>
@@ -57,7 +55,7 @@ export default function DriverViolations() {
           userViolations.map((violation) => (
             <div
               key={violation.id}
-              className="bg-card border border-border p-4 space-y-3"
+              className="bg-card border border-border p-4 space-y-3 rounded-2xl shadow-lg"
             >
               <div className="flex items-start justify-between">
                 <div>
@@ -68,7 +66,7 @@ export default function DriverViolations() {
                   </div>
                 </div>
                 <span
-                  className={`px-2 py-1 text-xs font-medium ${
+                  className={`px-3 py-1.5 text-xs font-medium rounded-xl shadow-sm flex items-center gap-1 ${
                     violation.status === 'paid'
                       ? 'bg-primary/10 text-primary'
                       : violation.status === 'sent'
@@ -76,6 +74,7 @@ export default function DriverViolations() {
                       : 'bg-destructive/10 text-destructive'
                   }`}
                 >
+                  {violation.status === 'paid' && <CheckCircle className="h-3 w-3" />}
                   {statusLabels[violation.status]}
                 </span>
               </div>
@@ -91,14 +90,15 @@ export default function DriverViolations() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-border">
-                <p className="font-semibold">
+              <div className="flex items-center justify-between pt-3 border-t border-border">
+                <p className="font-semibold text-lg">
                   {violation.fineAmount.toLocaleString('ar-SA')} ريال
                 </p>
                 {violation.status !== 'paid' && (
                   <Button
                     size="sm"
-                    onClick={() => handlePayViolation(violation.id)}
+                    onClick={handlePayViolation}
+                    className="rounded-xl shadow-md"
                   >
                     <ExternalLink className="h-4 w-4 ml-2" />
                     دفع عبر أبشر
