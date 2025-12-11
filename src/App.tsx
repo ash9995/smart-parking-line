@@ -8,7 +8,10 @@ import Violations from "./pages/Violations";
 import MapView from "./pages/MapView";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
-import DriverMap from "./pages/DriverMap";
+import { DriverLayout } from "./components/driver/DriverLayout";
+import DriverMapView from "./pages/driver/DriverMapView";
+import DriverViolations from "./pages/driver/DriverViolations";
+import DriverProfile from "./pages/driver/DriverProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,7 +28,14 @@ const App = () => (
           <Route path="/map" element={<MapView />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/driver" element={<DriverMap />} />
+          
+          {/* Driver App Routes */}
+          <Route path="/driver" element={<DriverLayout />}>
+            <Route index element={<DriverMapView />} />
+            <Route path="violations" element={<DriverViolations />} />
+            <Route path="profile" element={<DriverProfile />} />
+          </Route>
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
