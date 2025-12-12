@@ -148,6 +148,18 @@ export default function MapView() {
                     <span className="text-muted-foreground">المنطقة</span>
                     <span className="font-medium">{selectedSpot.zone}</span>
                   </div>
+                  {selectedSpot.neighborhood && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">الحي</span>
+                      <span className="font-medium">{selectedSpot.neighborhood}</span>
+                    </div>
+                  )}
+                  {selectedSpot.street && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">الشارع</span>
+                      <span className="font-medium">{selectedSpot.street}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">الحالة</span>
                     <span className={cn(
