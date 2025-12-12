@@ -5,7 +5,6 @@ import { ParkingSpot } from '@/types/parking';
 import { cn } from '@/lib/utils';
 import { Navigation, Send, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
 
 export default function MapView() {
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
@@ -21,19 +20,15 @@ export default function MapView() {
     violation: 'مخالفة',
   };
 
-  // Auto-send tickets for violations
+  // Auto-send tickets for violations (silently, no notifications)
   useEffect(() => {
     const violationSpots = mockParkingSpots.filter(s => s.status === 'violation');
     
     violationSpots.forEach((spot) => {
       if (!sentViolations.has(spot.id)) {
-        // Simulate auto-sending to Absher
+        // Simulate auto-sending to Absher silently
         setTimeout(() => {
           setSentViolations(prev => new Set(prev).add(spot.id));
-          toast({
-            title: 'تم إرسال المخالفة',
-            description: `تم إرسال مخالفة الموقف ${spot.id} إلى أبشر تلقائياً`,
-          });
         }, 1000 + Math.random() * 2000);
       }
     });
